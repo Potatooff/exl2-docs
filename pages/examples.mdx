@@ -1,0 +1,110 @@
+# Usage Examples
+
+## Basic Text Generation
+
+```python
+from exllamav2 import ExLlamaV2, ExLlamaV2Config, ExLlamaV2Cache, ExLlamaV2Tokenizer
+
+# Load model
+config = ExLlamaV2Config("path/to/model/config.json")
+model = ExLlamaV2(config)
+model.load("path/to/model/weights")
+
+# Setup tokenizer and cache
+tokenizer = ExLlamaV2Tokenizer("path/to/tokenizer.model")
+cache = ExLlamaV2Cache(model)
+
+# Generate text
+prompt = "Write a short poem about artificial intelligence."
+input_ids = tokenizer.encode(prompt)
+output_ids = model.generate(input_ids, max_new_tokens=100, temperature=0.7, cache=cache)
+print(tokenizer.decode(output_ids[0]))
+```
+
+## Streaming Generation
+
+```python
+from exllamav2.generator import ExLlamaV2Generator
+
+def stream_callback(text):
+    print(text, end="", flush=True)
+
+generator = ExLlamaV2Generator(model, tokenizer, cache)
+generator.generate_with_streaming(
+    "Explain quantum computing in simple terms.",
+    max_new_tokens=200,
+    callback=stream_callback
+)
+```
+
+## Batch Processing
+
+```python
+prompts = [
+    "Summarize the benefits of renewable energy.",
+    "List five applications of machine learning.",
+    "Explain how blockchain works."
+]
+
+# Tokenize all prompts
+batch_input_ids = [tokenizer.encode(p) for p in prompts]
+batch_size = len(prompts)
+
+# Create batch cache
+batch_cache = ExLlamaV2Cache(model, batch_size=batch_size)
+
+# Generate responses for all prompts
+batch_output_ids = model.generate(
+    batch_input_ids,
+    max_new_tokens=100,
+    temperature=0.8,
+    cache=batch_cache
+)
+
+# Process responses
+for i, output_ids in enumerate(batch_output_ids):
+    print(f"Response {i+1}:\n{tokenizer.decode(output_ids)}\n")
+```
+
+## Advanced Sampling Settings
+
+```python
+from exllamav2.generator import ExLlamaV2Generator
+
+generator = ExLlamaV2Generator(model, tokenizer, cache)
+
+# Configure advanced sampling parameters
+generator.settings.temperature = 0.8
+generator.settings.top_p = 0.92
+generator.settings.top_k = 50
+generator.settings.token_repetition_penalty = 1.1
+generator.settings.disallow_tokens([tokenizer.eos_token_id])  # Prevent EOS generation
+
+# Generate with custom settings
+response = generator.generate_simple(
+    "Write a creative story beginning with: 'The robot awakened for the first time and'",
+    max_new_tokens=200
+)
+
+print(response)
+```
+
+## Constrained Generation
+
+```python
+# Example of generating text that adheres to certain constraints
+from exllamav2.generator import ExLlamaV2Generator
+
+generator = ExLlamaV2Generator(model, tokenizer, cache)
+
+# Create a pattern constraint
+generator.settings.begin_suppress_tokens = tokenizer.encode("bad", add_bos=False, add_special=False)
+generator.settings.stop_strings = ["stop", "end", "quit"]
+
+response = generator.generate_simple(
+    "Write a brief positive review of ExLlamaV2:",
+    max_new_tokens=100
+)
+
+print(response)
+```

@@ -1,0 +1,141 @@
+# Troubleshooting
+
+## Common Issues and Solutions
+
+### Installation Problems
+
+#### CUDA Not Found
+
+**Issue:** Error about CUDA not being found during installation.
+
+**Solution:**
+```bash
+# Check CUDA installation
+nvcc --version
+
+# Make sure you have the correct PyTorch version with CUDA support
+pip install torch==2.0.1+cu118 --extra-index-url https://download.pytorch.org/whl/cu118
+```
+
+#### Build Failures
+
+**Issue:** Compilation errors during installation.
+
+**Solution:**
+```bash
+# Make sure you have a compatible C++ compiler
+# For Windows, install Visual Studio Build Tools
+# For Linux, ensure gcc/g++ are installed
+
+# Try installing with verbose output
+pip install exllamav2 -v
+
+# Try the pre-built wheels
+pip install --no-build-isolation exllamav2
+```
+
+### Runtime Errors
+
+#### Out of Memory
+
+**Issue:** `CUDA out of memory` errors when loading models or generating text.
+
+**Solution:**
+```python
+# Reduce memory usage
+config = ExLlamaV2Config("path/to/model/config.json")
+config.set_low_mem(True)
+config.max_seq_len = 1024  # Reduce context length
+
+# Or use a smaller model
+# 7B instead of 13B, or 4-bit instead of 6-bit quantization
+```
+
+#### Slow Performance
+
+**Issue:** Unusually slow text generation.
+
+**Solution:**
+```python
+# Check if flash attention is enabled
+config.no_flash_attn = False
+
+# Check if you're running on the discrete GPU (for laptops)
+# Use nvidia-smi to monitor GPU usage
+
+# Optimize generation parameters
+config.set_param("matmul_recons_thd", 4)
+config.set_param("fused_mlp", True)
+
+# Ensure correct CUDA version compatibility
+```
+
+#### Incorrect Output Format
+
+**Issue:** Model generates unexpected or malformed outputs.
+
+**Solution:**
+```python
+# Ensure you're using the correct tokenizer for the model
+tokenizer = ExLlamaV2Tokenizer("path/to/model/tokenizer.model")
+
+# Try with a different prompt format
+prompt = "<|system|>\nYou are a helpful AI assistant.\n<|user|>\nWhat is exllamav2?\n<|assistant|>\n"
+
+# For chat models, use the appropriate chat template
+# Check model card on Hugging Face for details
+```
+
+## Error Messages and Meanings
+
+| Error Message | Likely Cause | Solution |
+|---------------|--------------|----------|
+| `ValueError: loaded Tensor of incompatible shape` | Model file mismatch with config | Verify model files and config are from the same source |
+| `RuntimeError: CUDA error: device-side assert triggered` | Incorrect tensor type or shape | Check input tensors and model compatibility |
+| `NotImplementedError: No implementation found for...` | Missing CUDA kernel | Check for compatible CUDA version and GPU |
+| `KeyError: "key 'rope_theta' not found"` | Missing config parameter | Use a complete config.json file |
+
+## Model-Specific Issues
+
+### LLaMA/LLaMA-2 Models
+
+```python
+# For chat-tuned models, use proper chat template
+prompt = "### System: You are a helpful assistant.\n\n### User: What is ExLlamaV2?\n\n### Assistant:"
+
+# For base models, prompt engineering may be needed
+prompt = "Below is an instruction. Write a response that appropriately completes the request.\n\nInstruction: Explain ExLlamaV2.\n\nResponse:"
+```
+
+### Mixtral and MoE Models
+
+```python
+# For Mixtral/MoE models, ensure expert routing is enabled
+config.set_param("moe", True)
+
+# May require more VRAM than standard models
+config.set_param("moe_route_strategy", "top2")
+```
+
+## Diagnostic Tools
+
+```python
+# Check GPU utilization
+import torch
+print(f"CUDA available: {torch.cuda.is_available()}")
+print(f"Current device: {torch.cuda.current_device()}")
+print(f"Device name: {torch.cuda.get_device_name()}")
+
+# Memory check
+print(f"Total memory: {torch.cuda.get_device_properties(0).total_memory / 1e9} GB")
+print(f"Allocated memory: {torch.cuda.memory_allocated() / 1e9} GB")
+print(f"Reserved memory: {torch.cuda.memory_reserved() / 1e9} GB")
+
+# Verify model loading with details
+model.show_model_info(full=True)
+```
+
+For additional support, please:
+- Check the [GitHub Issues](https://github.com/turboderp/exllamav2/issues)
+- Join the community Discord server
+- Review the model card on Hugging Face for model-specific instructions

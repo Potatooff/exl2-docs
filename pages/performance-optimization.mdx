@@ -1,0 +1,122 @@
+# Performance Optimization
+
+## Memory Optimization
+
+### Reducing VRAM Usage
+
+```python
+# Low memory configuration
+config = ExLlamaV2Config("path/to/model/config.json")
+config.set_low_mem(True)
+config.max_seq_len = 1024  # Reduce from default if you don't need long contexts
+config.set_param("stream_layer_interval", 0)
+```
+
+### Sequence Length Management
+
+```python
+# Set appropriate sequence length based on your needs
+config.max_seq_len = 2048  # Lower value = less VRAM used
+
+# For dynamic sequence length:
+if input_text_length < 1000:
+    cache = ExLlamaV2Cache(model, max_seq_len=2048)
+else:
+    cache = ExLlamaV2Cache(model, max_seq_len=4096)
+```
+
+## Computation Optimization
+
+### Batch Processing
+
+```python
+# Process multiple prompts efficiently
+batch_size = 4
+config.max_batch_size = batch_size
+cache = ExLlamaV2Cache(model, batch_size=batch_size)
+
+# Prepare batch inputs
+prompts = ["Prompt 1", "Prompt 2", "Prompt 3", "Prompt 4"]
+batch_tokens = [tokenizer.encode(p) for p in prompts]
+
+# Generate for all prompts in parallel
+outputs = model.generate(batch_tokens, max_new_tokens=50, cache=cache)
+```
+
+### GPU Selection
+
+```python
+# For multi-GPU systems, select specific GPUs
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"  # Use first two GPUs
+
+# Or in code
+config.device_map = ["cuda:0", "cuda:1"]
+```
+
+## Advanced Techniques
+
+### Tensor Parallelism
+
+Split model across multiple GPUs:
+
+```python
+# Distribute model evenly across GPUs
+config.tensor_split = [0.5, 0.5]  # 50% on each of 2 GPUs
+
+# Or uneven split based on GPU capabilities
+config.tensor_split = [0.7, 0.3]  # 70% on GPU 0, 30% on GPU 1
+```
+
+### Mixed Precision
+
+```python
+# Use different precisions for different operations
+config.set_param("matmul_precision", "medium")  # Options: high, medium, low
+config.set_param("ffn_precision", "medium")     # For feed-forward networks
+
+# Force half precision where possible
+config.set_param("force_half", True)
+```
+
+## Measuring Performance
+
+```python
+import time
+from exllamav2.generator import ExLlamaV2Generator
+
+# Setup model, tokenizer, cache as usual
+generator = ExLlamaV2Generator(model, tokenizer, cache)
+
+# Measure generation speed
+prompt = "Generate a paragraph about artificial intelligence."
+tokens_to_generate = 100
+
+start_time = time.time()
+output = generator.generate_simple(prompt, tokens_to_generate)
+end_time = time.time()
+
+# Calculate tokens per second
+elapsed = end_time - start_time
+tokens_per_second = tokens_to_generate / elapsed
+print(f"Generation speed: {tokens_per_second:.2f} tokens/sec")
+```
+
+## Troubleshooting Performance Issues
+
+If you encounter poor performance:
+
+1. **CUDA Out of Memory errors**:
+   - Reduce `max_seq_len`
+   - Enable `set_low_mem(True)`
+   - Use a smaller model or more aggressive quantization
+
+2. **Slow generation**:
+   - Check for thermal throttling
+   - Try disabling some optimizations that might cause issues on your hardware
+   - Monitor GPU utilization (should be high during generation)
+   
+3. **CPU bottlenecks**:
+   - Ensure tokenization is not the bottleneck
+   - Pre-tokenize inputs when possible
+   - Use streaming generation for perceived performance

@@ -1,0 +1,73 @@
+# API Reference
+
+## Core Components
+
+### ExLlamaV2Config
+
+```python
+class ExLlamaV2Config:
+    def __init__(self, model_config_path: str)
+    def prepare(self)
+    def get_param(self, key: str)
+    def set_param(self, key: str, value)
+```
+
+Configuration class for ExLlamaV2 models. Handles loading and modifying the model configuration.
+
+### ExLlamaV2
+
+```python
+class ExLlamaV2:
+    def __init__(self, config: ExLlamaV2Config)
+    def load(self, model_path: str, max_batch_size: int = 1)
+    def forward(self, input_ids, cache, input_mask = None)
+```
+
+Main model class that handles loading weights and running inference.
+
+### ExLlamaV2Cache
+
+```python
+class ExLlamaV2Cache:
+    def __init__(self, model: ExLlamaV2, batch_size: int = 1, max_seq_len: int = None)
+```
+
+Manages KV cache for efficient token generation.
+
+### ExLlamaV2Tokenizer
+
+```python
+class ExLlamaV2Tokenizer:
+    def __init__(self, tokenizer_path: str)
+    def encode(self, text: str, add_bos: bool = True, add_special: bool = True)
+    def decode(self, ids)
+```
+
+Handles tokenization and detokenization of text.
+
+## Generation Components
+
+### ExLlamaV2Generator
+
+```python
+class ExLlamaV2Generator:
+    def __init__(self, model, tokenizer, cache = None)
+    def generate_simple(self, prompt, max_new_tokens = 50)
+    def generate_with_streaming(self, prompt, max_new_tokens = 50, callback = None)
+```
+
+High-level generation interface with various sampling methods.
+
+### ExLlamaV2Sampler
+
+```python
+class ExLlamaV2Sampler:
+    def __init__(self)
+    def set_temperature(self, temperature: float)
+    def set_top_p(self, top_p: float)
+    def set_top_k(self, top_k: int)
+```
+
+Controls the sampling parameters for text generation.
+
+For complete implementation details, please refer to the [source code repository](https://github.com/turboderp/exllamav2).

@@ -1,0 +1,93 @@
+# Model Compatibility
+
+## Supported Model Architectures
+
+ExLlamaV2 currently supports these model architectures:
+
+- LLaMA, LLaMA-2
+- CodeLlama
+- Mistral
+- Mixtral (MoE models)
+- Vicuna
+- Yi
+- Phind-CodeLlama
+- WizardCoder
+- OpenChat models
+- Most LLaMA derivatives (fine-tuned models)
+
+## Quantization Formats
+
+ExLlamaV2 supports these quantization formats:
+
+### GPTQ Format
+
+The primary quantization format is 4-bit GPTQ:
+
+```python
+# Load GPTQ quantized model
+config = ExLlamaV2Config("path/to/gptq_model/config.json")
+config.prepare()
+model = ExLlamaV2(config)
+model.load("path/to/gptq_model/gptq_model-4bit-gs128.safetensors")
+```
+
+Required files:
+- `config.json` - Model configuration
+- `tokenizer.model` - Tokenizer model file
+- `*.safetensors` - Quantized weights file
+
+### EXL2 Format
+
+ExLlamaV2 also supports its native EXL2 format:
+
+```python
+# Load EXL2 quantized model
+config = ExLlamaV2Config("path/to/exl2_model/config.json")
+config.prepare()
+model = ExLlamaV2(config)
+model.load("path/to/exl2_model/model.safetensors")
+```
+
+## Converting Models
+
+### GPTQ to EXL2 Conversion
+
+```python
+from exllamav2.convert import convert_gptq_to_exl2
+
+convert_gptq_to_exl2(
+    "path/to/gptq_model",
+    "path/to/output_directory",
+    bits = 4,
+    group_size = 128,
+    allow_float16 = True
+)
+```
+
+### HuggingFace to EXL2 Conversion
+
+```python
+from exllamav2.convert import convert_hf_to_exl2
+
+convert_hf_to_exl2(
+    "path/to/hf_model",
+    "path/to/output_directory",
+    bits = 4,
+    group_size = 128,
+    allow_float16 = True
+)
+```
+
+## Model Sources
+
+ExLlamaV2-compatible models can be found at:
+
+1. [Hugging Face](https://huggingface.co/) - Search for GPTQ-quantized models
+2. [TheBloke's Hugging Face page](https://huggingface.co/TheBloke) - Extensive collection of quantized models
+
+## Compatibility Notes
+
+- For best performance, prefer 4-bit GPTQ models with group size 128
+- Models without rotation and scaling factors may work but with reduced quality
+- 3-bit and 2-bit quantized models are supported but with quality tradeoffs
+- Custom adapters (LoRA, QLoRA) require separate loading mechanisms

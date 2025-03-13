@@ -1,0 +1,146 @@
+# Contributing to ExLlamaV2
+
+## Development Environment Setup
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/turboderp/exllamav2.git
+   cd exllamav2
+   ```
+
+2. **Create a development environment**:
+   ```bash
+   # Using conda
+   conda create -n exllamav2-dev python=3.10
+   conda activate exllamav2-dev
+   
+   # Install dependencies
+   pip install -e '.[dev]'
+   ```
+
+3. **Install development tools**:
+   ```bash
+   pip install pytest pytest-cov black isort mypy
+   ```
+
+## Code Style Guidelines
+
+ExLlamaV2 follows these coding conventions:
+
+- **Python**: Follow PEP 8 style guide
+- **C++/CUDA**: Follow Google C++ Style Guide
+- **Indentation**: 4 spaces for Python, 2 spaces for C++/CUDA
+- **Line length**: Maximum 100 characters
+- **Naming**:
+  - Classes: `CamelCase`
+  - Functions/methods: `snake_case`
+  - Variables: `snake_case`
+  - Constants: `UPPER_SNAKE_CASE`
+
+## Pull Request Process
+
+1. **Fork the repository**
+
+2. **Create a feature branch**:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+3. **Make your changes**:
+   - Write code that follows style guidelines
+   - Add unit tests for new functionality
+   - Update documentation for user-visible changes
+
+4. **Run tests**:
+   ```bash
+   pytest -xvs tests/
+   ```
+
+5. **Format your code**:
+   ```bash
+   black .
+   isort .
+   ```
+
+6. **Commit with descriptive messages**:
+   ```bash
+   git commit -m "Add feature: description of the feature"
+   ```
+
+7. **Push to your fork**:
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+8. **Create a Pull Request**:
+   - Describe what your PR accomplishes
+   - Link to any relevant issues
+   - Provide examples/screenshots if applicable
+
+## Testing Guidelines
+
+- Write unit tests for new functionality
+- Ensure tests cover both success and failure cases
+- Test with different model sizes if appropriate
+- For performance-critical code, include performance tests
+
+Example test:
+
+```python
+def test_model_loading():
+    config = ExLlamaV2Config("path/to/test/model/config.json")
+    model = ExLlamaV2(config)
+    model.load("path/to/test/model/weights")
+    
+    # Test basic functionality
+    assert model.loaded
+    assert model.config.hidden_size > 0
+```
+
+## Documentation Guidelines
+
+- Document all public APIs
+- Use docstrings in Google style format
+- Update README.md with user-visible changes
+- Include examples for new features
+
+Example docstring:
+
+```python
+def generate(self, input_ids, max_new_tokens=20, temperature=1.0):
+    """Generates text given input prompt tokens.
+    
+    Args:
+        input_ids: Tensor containing token IDs of the prompt
+        max_new_tokens: Maximum number of new tokens to generate
+        temperature: Sampling temperature (higher = more random)
+        
+    Returns:
+        Tensor containing input_ids and generated token IDs
+        
+    Raises:
+        ValueError: If temperature <= 0
+    """
+```
+
+## Reporting Bugs
+
+When reporting bugs, please include:
+
+1. ExLlamaV2 version
+2. PyTorch version and CUDA version
+3. GPU model and driver version
+4. Complete error message and stack trace
+5. Minimal code example that reproduces the issue
+6. Model being used (with link if possible)
+
+## Feature Requests
+
+For feature requests, please describe:
+
+1. The problem you're trying to solve
+2. Your proposed solution
+3. Alternative solutions you've considered
+4. How this feature would benefit other users
+
+Thank you for contributing to ExLlamaV2!

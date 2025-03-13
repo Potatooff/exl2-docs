@@ -1,0 +1,72 @@
+# Getting Started with ExLlamaV2
+
+## Basic Usage
+
+Here's how to load a model and generate text with ExLlamaV2:
+
+```python
+from exllamav2 import (
+    ExLlamaV2,
+    ExLlamaV2Config,
+    ExLlamaV2Cache,
+    ExLlamaV2Tokenizer
+)
+
+# Initialize model
+config = ExLlamaV2Config("path/to/model/config.json")
+model = ExLlamaV2(config)
+model.load("path/to/model/weights")
+
+# Initialize tokenizer and cache
+tokenizer = ExLlamaV2Tokenizer("path/to/tokenizer/tokenizer.model")
+cache = ExLlamaV2Cache(model)
+
+# Generate text
+input_text = "Once upon a time"
+input_ids = tokenizer.encode(input_text)
+model_output = model.generate(
+    input_ids=input_ids,
+    max_new_tokens=50,
+    temperature=0.8,
+    cache=cache
+)
+
+output_text = tokenizer.decode(model_output[0])
+print(output_text)
+```
+
+## Common Workflows
+
+### Text Completion
+
+```python
+# Set up prompt
+prompt = "Complete this sentence: The key advantage of ExLlamaV2 is"
+
+# Tokenize and generate
+input_ids = tokenizer.encode(prompt)
+output_ids = model.generate(input_ids, max_new_tokens=30, cache=cache)
+print(tokenizer.decode(output_ids[0]))
+```
+
+### Chat Completion
+
+```python
+from exllamav2.generator import ExLlamaV2Generator
+
+# Initialize generator
+generator = ExLlamaV2Generator(model, tokenizer, cache)
+
+# Configure parameters
+generator.settings.temperature = 0.7
+generator.settings.top_p = 0.9
+
+# Chat completion
+response = generator.generate_simple(
+    "User: How does ExLlamaV2 improve upon ExLlama?\nAssistant:",
+    max_new_tokens=100
+)
+print(response)
+```
+
+For more advanced usage patterns, check the [API Reference](/api-reference) and [Usage Examples](/examples) sections.

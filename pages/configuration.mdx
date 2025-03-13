@@ -1,0 +1,91 @@
+# Configuration
+
+## Model Configuration
+
+ExLlamaV2 uses a configuration file to specify model parameters. Here are the key configuration options:
+
+### Basic Configuration
+
+```python
+config = ExLlamaV2Config("path/to/model/config.json")
+
+# Optional configuration tweaks
+config.max_seq_len = 4096          # Set maximum sequence length
+config.max_batch_size = 4          # Set maximum batch size
+config.no_flash_attn = False       # Disable flash attention
+```
+
+### Memory Optimization
+
+```python
+# Reduce memory usage (at the cost of speed)
+config.set_low_mem(True)
+
+# Or fine-tune memory usage parameters
+config.set_param("matmul_recons_thd", 8)
+config.set_param("fused_mlp", False)
+config.set_param("sdp_thd", 8)
+```
+
+### Performance Configuration
+
+```python
+# Adjust tensor parallelism for multi-GPU setups
+config.tensor_split = [6, 4]  # Split across two GPUs with 60%/40% ratio
+
+# Set compute precision
+config.set_param("calc_type", "float16")  # Options: float16, bfloat16, float32
+
+# Optimize for your specific GPU
+config.set_param("gpu_peer_fix", True)  # For multi-GPU systems with specific issues
+```
+
+## Generation Settings
+
+Control text generation with these parameters:
+
+```python
+from exllamav2.generator import ExLlamaV2Generator
+
+generator = ExLlamaV2Generator(model, tokenizer, cache)
+
+# Basic settings
+generator.settings.temperature = 0.8        # Higher = more random, lower = more deterministic
+generator.settings.top_p = 0.92             # Nucleus sampling probability threshold
+generator.settings.top_k = 50               # Limit sampling to top k tokens
+generator.settings.token_repetition_penalty = 1.05  # Penalize repeated tokens
+
+# Advanced settings
+generator.settings.beam_size = 1            # Beam search width (1 = greedy/sampling)
+generator.settings.min_p = 0.05             # Minimum probability threshold
+generator.settings.typical = 0.95           # Typical sampling threshold
+generator.settings.mirostat = False         # Enable mirostat sampling algorithm
+generator.settings.mirostat_tau = 5.0       # Mirostat target entropy
+generator.settings.mirostat_eta = 0.1       # Mirostat learning rate
+```
+
+## System Requirements
+
+ExLlamaV2 requires:
+
+- NVIDIA GPU with at least 6GB VRAM (more for larger models)
+- CUDA 11.7 or later
+- Python 3.8 or later
+- PyTorch 2.0 or later
+
+For optimal performance:
+
+- For 7B parameter models: At least 8GB VRAM
+- For 13B parameter models: At least 16GB VRAM
+
+- For 30B+ parameter models: At least 24GB VRAM or multi-GPU setup
+
+## Environment Variables
+
+ExLlamaV2 responds to these environment variables:
+
+```
+EXLLAMA_CACHE_DIR          # Directory for cached files
+EXLLAMA_VERBOSE=1          # Enable verbose logging
+CUDA_VISIBLE_DEVICES=0,1   # Control which GPUs are used
+```

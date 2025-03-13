@@ -1,0 +1,22 @@
+{
+  "index": "Introduction",
+  "installation": "Installation",
+  "getting-started": "Getting Started",
+  "api-reference": "API Reference",
+  "examples": "Examples",
+  "configuration": "Configuration",
+  "model-compatibility": "Model Compatibility",
+  "performance-optimization": "Performance Optimization",
+  "troubleshooting": "Troubleshooting",
+  "contributing": "Contributing",
+  "about": {
+    "title": "About",
+    "type": "page"
+  },
+  "contact": {
+    "title": "Contact ↗",
+    "type": "page",
+    "href": "https://github.com/turboderp/exllamav2/issues",
+    "newWindow": true
+  }
+}
