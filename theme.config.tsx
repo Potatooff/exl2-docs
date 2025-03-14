@@ -7,11 +7,11 @@ const config: DocsThemeConfig = {
     link: 'https://github.com/turboderp-org/exllamav2',
   },
   chat: {
-    link: 'https://discord.com/dsCjen9AUV',
+    link: 'https://discord.gg/dsCjen9AUV',
   },
-  docsRepositoryBase: 'https://github.com/turboderp-org/exllamav2',
+  docsRepositoryBase: 'https://github.com/Potatooff/exl2-docs',
   footer: {
-    text: 'Exllamav2 Documentation',
+    text: 'Exllamav2 Made by a cat',
   },
 }
 
